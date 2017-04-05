@@ -7,8 +7,7 @@ echo "|  |\  \ \ '-'  |.-'  \`)| '-' '| \`-' ||  |\ '-'  ||  ||  | "
 echo "\`--' '--' \`--\`--'\`----' |  |-'  \`---' \`--' \`--\`--'\`--''--' "
 echo "                        \`--'                              "
 
-##	I'm trying to get this script to also backup USB drives so it can work with berryboot (e.g backup your rpi micro sd which contains te /boot partiiton as well as it's USB storage.)
-##	also (verry expirimental!) I have made an option to mount an .gz as a loop device for viewing and/or editing before restore.
+## (verry expirimental!) I have made an option to mount an .gz as a loop device for viewing and/or editing before restore.
 
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' dialog|grep "install ok installed")
 
@@ -96,9 +95,7 @@ function createmenu ()
  done
 
 }
-
-
-PS3='Do you want to backup or restore the raspbian sdcard? '
+PS3='Do you want to backup or restore an sdcard or do you want to mount or unmount an backup? '
 options=("Backup" "Restore" "Mount" "Unmount" "Quit")
 select opt in "${options[@]}"
 do
