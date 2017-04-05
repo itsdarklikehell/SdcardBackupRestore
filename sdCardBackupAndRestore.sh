@@ -1,5 +1,5 @@
 #!/bin/bash
-                                                           
+
 echo ",------.                       ,--.   ,--.                 "
 echo "|  .--. ' ,--,--. ,---.  ,---. |  |-. \`--' ,--,--.,--,--,  "
 echo "|  '--'.'' ,-.  |(  .-' | .-. || .-. ',--.' ,-.  ||      \\"
@@ -7,6 +7,8 @@ echo "|  |\  \ \ '-'  |.-'  \`)| '-' '| \`-' ||  |\ '-'  ||  ||  | "
 echo "\`--' '--' \`--\`--'\`----' |  |-'  \`---' \`--' \`--\`--'\`--''--' "
 echo "                        \`--'                              "
 
+##	I'm trying to get this script to also backup USB drives so it can work with berryboot (e.g backup your rpi micro sd which contains te /boot partiiton as well as it's USB storage.)
+##	also (verry expirimental!) I have made an option to mount an .gz as a loop device for viewing and/or editing before restore.
 
 PKG_OK=$(dpkg-query -W --showformat='${Status}\n' dialog|grep "install ok installed")
 
@@ -34,7 +36,7 @@ function do_restore
 	createmenu ${ARRAY_DISK}
 	echo "  "
 	DISK=${option}
-	echo  "What is the full path to the .gz file to restore?" 
+	echo  "What is the full path to the .gz file to restore?"
 	read FILE
 
 
@@ -52,14 +54,31 @@ function do_restore
 		echo "User aborted operation!"
     	exit 1
 	fi
-	
+
 	echo "Starting restore, this may take a long time.... just wait please!"
     sudo gzip -dc ${FILE} | dd bs=4M of=${DISK}  status=progress
 	echo "Restore done and saved with file ${FILE}"
 	echo "Bye!"
 	exit 0
 }
-
+function do_mount() {
+	echo  "What is the full path to the .gz file to mount?"
+	read FILE
+	echo "where would you like to mount this e.g.  /mnt/USB_image"
+	read LOCATION
+	mount ${FILE} ${LOCATION} -o loop
+	echo "Mountpoint created ${LOCATION} from ${FILE}"
+	echo "Bye!"
+	exit 0
+}
+function do_umount() {
+	echo "where did you mount this? e.g. /mnt/USB_image"
+	read LOCATION
+	umount ${LOCATION}
+	echo "Mountpoint ${LOCATION} unmounted"
+	echo "Bye!"
+	exit 0
+}
 function createmenu ()
 {
   select option; do # in "$@" is the default
@@ -80,26 +99,33 @@ function createmenu ()
 
 
 PS3='Do you want to backup or restore the raspbian sdcard? '
-options=("Backup 1" "Restore 2" "Quit")
+options=("Backup" "Restore" "Mount" "Unmount" "Quit")
 select opt in "${options[@]}"
 do
     case $opt in
-        "Backup 1")
+        "Backup")
             echo "Backup..."
             echo " "
 	    	do_backup
             ;;
-        "Restore 2")
+        "Restore")
             echo "Restore..."
             echo " "
 	    	do_restore
             ;;
-        "Quit")
+				"Mount")
+		        echo "Mount..."
+		        echo " "
+			  do_mount
+		        ;;
+				"Unmount")
+		        echo "Unmount..."
+		        echo " "
+			  do_unmount
+		        ;;
+				"Quit")
             break
             ;;
         *) echo invalid option;;
     esac
 done
-
-
-
